@@ -1,0 +1,12 @@
+#!name=PingMe for Surge
+#!desc=PingMe 自动签到+视频奖励（Surge 兼容版）
+#!author=Hermes
+#!homepage=https://github.com/ZenmoFeiShi/Qx
+#!system=ios
+
+[Script]
+PingMe_Capture = type=http-request,pattern=^https:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus,script-path=https://raw.githubusercontent.com/lingkai995/PingMe/main/PingMe.surge.js
+PingMe_Cron = type=cron,cronexp="30 8,20 * * *",script-path=https://raw.githubusercontent.com/lingkai995/PingMe/main/PingMe.surge.js
+
+[MITM]
+hostname = %APPEND% api.pingmeapp.net
