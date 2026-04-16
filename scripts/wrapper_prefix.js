@@ -26,6 +26,12 @@ function done(value) {
   if (typeof $done !== 'undefined') $done(value);
 }
 
+function stableStringify(obj) {
+  if (obj === null || typeof obj !== 'object') return JSON.stringify(obj);
+  if (Array.isArray(obj)) return '[' + obj.map(stableStringify).join(',') + ']';
+  return '{' + Object.keys(obj).sort().map(k => JSON.stringify(k) + ':' + stableStringify(obj[k])).join(',') + '}';
+}
+
 function requestGet(options) {
   return new Promise((resolve, reject) => {
     if (typeof $task !== 'undefined') {

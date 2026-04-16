@@ -26,6 +26,12 @@ function done(value) {
   if (typeof $done !== 'undefined') $done(value);
 }
 
+function stableStringify(obj) {
+  if (obj === null || typeof obj !== 'object') return JSON.stringify(obj);
+  if (Array.isArray(obj)) return '[' + obj.map(stableStringify).join(',') + ']';
+  return '{' + Object.keys(obj).sort().map(k => JSON.stringify(k) + ':' + stableStringify(obj[k])).join(',') + '}';
+}
+
 function requestGet(options) {
   return new Promise((resolve, reject) => {
     if (typeof $task !== 'undefined') {
@@ -65,6 +71,7 @@ hostname = api.pingmeapp.net
 
 const scriptName = 'PingMe';
 const ckKey = 'pingme_capture_v3';
+const ckHashKey = 'pingme_capture_hash_v1';
 const SECRET = '0fOiukQq7jXZV2GRi9LGlO';
 const MAX_VIDEO = 5;
 const VIDEO_DELAY = 8000;
@@ -210,9 +217,12 @@ if (typeof $request !== 'undefined' && $request) {
     paramsRaw: parseRawQuery($request.url),
     headers: normalizeHeaderNameMap($request.headers || {})
   };
-  store.write(JSON.stringify(capture), ckKey);
-  const keys = Object.keys(capture.paramsRaw).filter(k => k !== 'sign').join(', ');
-  notifyDone('✅ 参数抓取成功', `已保存请求头+参数`);
+  const captureJson = JSON.stringify(capture);
+  const captureHash = MD5(stableStringify(capture));
+  const prevHash = store.read(ckHashKey);
+  store.write(captureJson, ckKey);
+  store.write(captureHash, ckHashKey);
+  if (prevHash !== captureHash) notifyDone('✅ 参数抓取成功', prevHash ? '检测到参数变化，已更新保存' : '已保存请求头+参数');
   console.log(`【${scriptName}】capture:\n${JSON.stringify(capture, null, 2)}`);
   done({});
 } else {
