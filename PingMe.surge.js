@@ -54,7 +54,7 @@ function requestGet(options) {
 @Author：怎么肥事
 
 [rewrite_local]
-^https:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus url script-request-header https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/PingMe.js
+^https:\/\/api\.pingmeapp\.net\/app\/queryBalance url script-request-header https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/PingMe.js
 
 [task_local]
 30 8,20 * * * https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/PingMe.js, tag=PingMe签到, enabled=true
@@ -266,7 +266,7 @@ if (typeof $request !== 'undefined' && $request) {
       return next();
     }
 
-    fetchApi('queryBalanceAndBonus').then(res => {
+    fetchApi('queryBalance').then(res => {
       try {
         const d = JSON.parse(res.body);
         if (d.retcode === 0) msgs.push(`💰 余额：${d.result.balance} Coins`);
@@ -285,7 +285,7 @@ if (typeof $request !== 'undefined' && $request) {
       }
       return doVideoLoop(MAX_VIDEO);
     }).then(() => {
-      return fetchApi('queryBalanceAndBonus');
+      return fetchApi('queryBalance');
     }).then(res => {
       try {
         const d = JSON.parse(res.body);
