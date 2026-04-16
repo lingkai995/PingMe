@@ -225,7 +225,6 @@ if (typeof $request !== 'undefined' && $request) {
     try { capture = JSON.parse(raw); } catch (e) {
       notifyDone('⚠️ 参数损坏', '请重新打开 PingMe 抓参');
       done();
-      return;
     }
 
     const headers = buildHeaders(capture);

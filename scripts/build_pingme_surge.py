@@ -20,5 +20,8 @@ replacements = {
 for old, new in replacements.items():
     up = up.replace(old, new)
 
+# Surge's JSCore rejects top-level `return;` statements.
+up = up.replace("      done();\n      return;", "      done();")
+
 out.write_text(pre + '\n' + up, encoding='utf-8')
 print(f'Wrote {out}')
