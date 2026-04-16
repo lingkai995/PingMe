@@ -15,7 +15,6 @@ replacements = {
     '$notify': 'notify',
     '$done': 'done',
     '$task.fetch': 'requestGet',
-    'queryBalanceAndBonus': 'queryBalance',
 }
 
 for old, new in replacements.items():
