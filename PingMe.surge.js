@@ -217,8 +217,16 @@ if (typeof $request !== 'undefined' && $request) {
     paramsRaw: parseRawQuery($request.url),
     headers: normalizeHeaderNameMap($request.headers || {})
   };
+  const stableCapture = {
+    paramsRaw: Object.fromEntries(Object.entries(capture.paramsRaw || {}).filter(([k]) => !['sign', 'signDate'].includes(k))),
+    headers: {
+      'User-Agent': capture.headers?.['User-Agent'] || capture.headers?.['user-agent'] || '',
+      'Authorization': capture.headers?.['Authorization'] || capture.headers?.['authorization'] || '',
+      'Cookie': capture.headers?.['Cookie'] || capture.headers?.['cookie'] || ''
+    }
+  };
   const captureJson = JSON.stringify(capture);
-  const captureHash = MD5(stableStringify(capture));
+  const captureHash = MD5(stableStringify(stableCapture));
   const prevHash = store.read(ckHashKey);
   store.write(captureJson, ckKey);
   store.write(captureHash, ckHashKey);
