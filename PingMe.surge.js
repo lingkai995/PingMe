@@ -1,12 +1,5 @@
-// Surge compatible wrapper for PingMe auto check-in + video bonus
-// Based on upstream: https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/PingMe.js
-// Updated for Surge/QX dual compatibility
-
-const scriptName = 'PingMe';
-const ckKey = 'pingme_capture_v3';
-const SECRET = '0fOiukQq7jXZV2GRi9LGlO';
-const MAX_VIDEO = 5;
-const VIDEO_DELAY = 8000;
+// Surge/QX compatible PingMe script
+// Generated from upstream PingMe.js via scripts/build_pingme_surge.py
 
 const isSurge = typeof $persistentStore !== 'undefined';
 const isQX = typeof $prefs !== 'undefined';
@@ -53,6 +46,28 @@ function requestGet(options) {
     reject({ error: 'No HTTP client available' });
   });
 }
+
+
+//2026/04/16
+/*
+@Name：PingMe 自动化签到+视频奖励
+@Author：怎么肥事
+
+[rewrite_local]
+^https:\/\/api\.pingmeapp\.net\/app\/queryBalanceAndBonus url script-request-header https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/PingMe.js
+
+[task_local]
+30 8,20 * * * https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/PingMe.js, tag=PingMe签到, enabled=true
+
+[MITM]
+hostname = api.pingmeapp.net
+*/
+
+const scriptName = 'PingMe';
+const ckKey = 'pingme_capture_v3';
+const SECRET = '0fOiukQq7jXZV2GRi9LGlO';
+const MAX_VIDEO = 5;
+const VIDEO_DELAY = 8000;
 
 function MD5(string) {
   function RotateLeft(lValue, iShiftBits) { return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits)); }
@@ -196,13 +211,14 @@ if (typeof $request !== 'undefined' && $request) {
     headers: normalizeHeaderNameMap($request.headers || {})
   };
   store.write(JSON.stringify(capture), ckKey);
-  notifyDone('✅ 参数抓取成功', '已保存请求头+参数');
+  const keys = Object.keys(capture.paramsRaw).filter(k => k !== 'sign').join(', ');
+  notifyDone('✅ 参数抓取成功', `已保存请求头+参数`);
   console.log(`【${scriptName}】capture:\n${JSON.stringify(capture, null, 2)}`);
   done({});
 } else {
   const raw = store.read(ckKey);
   if (!raw) {
-    notifyDone('⚠️ 未抓到参数', '先打开 PingMe 触发一次');
+    notifyDone('⚠️ 未抓到参数', '先打开 PingMe 触发一次 ');
     done();
   } else {
     let capture;
@@ -216,7 +232,7 @@ if (typeof $request !== 'undefined' && $request) {
     const msgs = [];
 
     function fetchApi(path) {
-      return requestGet({ url: buildUrl(path, capture), headers });
+      return requestGet({ url: buildUrl(path, capture), method: 'GET', headers });
     }
 
     function doVideoLoop(count) {
